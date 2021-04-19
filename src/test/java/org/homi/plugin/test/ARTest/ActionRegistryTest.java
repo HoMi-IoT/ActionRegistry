@@ -7,9 +7,6 @@ import org.homi.plugin.api.*;
 import org.homi.plugin.ble.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -42,9 +39,9 @@ class ActionRegistryTest {
 	@Test
 	void pluginParserGetsSpecs() {
 		PluginParser pp = new PluginParser();
-		BLE ble = new BLE();
-		ble.setup();
-		pp.getSpecs(ble);
+		DummyPlugin d = new DummyPlugin();
+		d.setup();
+		pp.getSpecs(d);
 	}
 	
 	@Test
@@ -66,6 +63,17 @@ class ActionRegistryTest {
 		ar.setup();
 		DummyPlugin d = new DummyPlugin();
 		ar.addPlugin(d);
+		
+	}
+	
+	@Test
+	void actionRegistryIssuesCommandToPlugin() {
+		ActionRegistry ar = new ActionRegistry();
+		ar.setup();
+		DummyPlugin d = new DummyPlugin();
+		ar.addPlugin(d);
+		
+		ar.sendCommandToPlugin(d, "BLESpec", "CONNECT", "arg");
 		
 	}
 	

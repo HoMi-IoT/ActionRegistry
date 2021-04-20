@@ -9,6 +9,7 @@ import org.homi.plugin.ble.*;
 import static org.junit.Assert.assertEquals;
 import java.util.List;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -71,11 +72,15 @@ class ActionRegistryTest {
 		ActionRegistry ar = new ActionRegistry();
 		ar.setup();
 		DummyPlugin d = new DummyPlugin();
+		d.setup();
 		ar.addPlugin(d);
+		Assertions.assertTrue((boolean)ar.sendCommandToPlugin(d, "BLESpec", "CONNECT", "arg"));
 		
-		ar.sendCommandToPlugin(d, "BLESpec", "CONNECT", "arg");
+		
 		
 	}
+	
+	
 	
 	
 

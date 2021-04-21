@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.homi.plugin.ARspec.ARSpec;
+import org.homi.plugin.BLEspec.BLESpec;
 
 
 @PluginID(id = "ActionRegistry")
@@ -15,14 +16,20 @@ public class ActionRegistry extends AbstractPlugin{
 	private Map<AbstractPlugin, List<Class<? extends ISpecification>>> abstractPluginToSpecMappings = new HashMap<>();
 	private Map<String, List<Class<? extends ISpecification>>> pluginIdToSpecMappings = new HashMap<>();
 	
-	//private IPluginProvider core ;
-	PluginParser pluginParser = new PluginParser();
+		
+		
+	private PluginParser pluginParser = new PluginParser();
 	@Override
 	public void setup() {	
-		
+		CommanderBuilder<ARSpec> cb = new CommanderBuilder<>(ARSpec.class) ;
+		cb.onCommandEquals(ARSpec.CALL, this::call).build();
 	}
 	
-	public Object call(Object...objects) {
+	public Object call(Object... objects) {
+		AbstractPlugin p = findPluginForSpec((String)objects[0]);
+		if(p != null) {
+			return sendCommandToPlugin(p, (String)objects[0], (String)objects[1], objects[2]);
+		}
 		return null;
 	}
 
@@ -60,6 +67,22 @@ public class ActionRegistry extends AbstractPlugin{
 			}
 		}
 		return null;
+	}
+
+	public AbstractPlugin findPluginForSpec(String specID) {
+		
+		for(Map.Entry<AbstractPlugin, List<Class<? extends ISpecification>>> entry : abstractPluginToSpecMappings.entrySet()) {
+			List<Class<? extends ISpecification>> specs = entry.getValue();
+			for(Class<? extends ISpecification> spec : specs) {
+				if(spec.getAnnotation(SpecificationID.class).id().equals(specID)) {
+					return entry.getKey();
+				}
+			}
+		}
+		
+		return null;
+		
+		
 	}
 
 }

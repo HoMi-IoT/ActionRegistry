@@ -5,6 +5,8 @@ import org.homi.plugin.ARspec.*;
 import org.homi.plugin.BLEspec.BLESpec;
 import org.homi.plugin.api.*;
 import org.homi.plugin.ble.*;
+import org.homi.plugin.specification.ISpecification;
+import org.homi.plugin.specification.SpecificationID;
 
 import static org.junit.Assert.assertEquals;
 import java.util.List;
@@ -75,9 +77,19 @@ class ActionRegistryTest {
 		d.setup();
 		ar.addPlugin(d);
 		Assertions.assertTrue((boolean)ar.sendCommandToPlugin(d, "BLESpec", "CONNECT", "arg"));
+	}
+	
+	@Test
+	void actionRegistryFindsPluginThatImplementsCertainSpec() {
+		ActionRegistry ar = new ActionRegistry();
+		ar.setup();
+		DummyPlugin d = new DummyPlugin();
+		d.setup();
+		ar.addPlugin(d);
+		AbstractPlugin p = ar.findPluginForSpec("BLESpec");
+		Assertions.assertTrue(p.getClass().getAnnotation(PluginID.class).id().equals("DummyPlugin"));
 		
-		
-		
+		Assertions.assertTrue(p.getSpecifications().get(0).getAnnotation(SpecificationID.class).id().equals("BLESpec"));
 	}
 	
 	

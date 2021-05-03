@@ -12,7 +12,7 @@ import org.homi.plugin.BLEspec.BLESpec;
 
 
 @PluginID(id = "ActionRegistry")
-public class ActionRegistry extends AbstractPlugin{
+public class ActionRegistry extends AbstractPlugin implements IPluginRegistryListener{
 	private Map<AbstractPlugin, List<Class<? extends ISpecification>>> abstractPluginToSpecMappings = new HashMap<>();
 	private Map<String, List<Class<? extends ISpecification>>> pluginIdToSpecMappings = new HashMap<>();
 	
@@ -23,6 +23,8 @@ public class ActionRegistry extends AbstractPlugin{
 	public void setup() {	
 		CommanderBuilder<ARSpec> cb = new CommanderBuilder<>(ARSpec.class) ;
 		cb.onCommandEquals(ARSpec.CALL, this::call).build();
+		
+		this.getPluginProvider().addPluginRegistryListener(this);
 	}
 	
 	public Object call(Object... objects) {
@@ -33,7 +35,7 @@ public class ActionRegistry extends AbstractPlugin{
 		return null;
 	}
 
-	public void addPlugin(AbstractPlugin plugin) {
+	public void addPluginInternal(AbstractPlugin plugin) {
 		
 		abstractPluginToSpecMappings.put(plugin, plugin.getSpecifications());
 		pluginIdToSpecMappings.put(plugin.getClass().getAnnotation(PluginID.class).id(), plugin.getSpecifications());
@@ -82,6 +84,24 @@ public class ActionRegistry extends AbstractPlugin{
 		
 		return null;
 		
+		
+	}
+
+	@Override
+	public void teardown() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addPlugin(IPlugin arg0) {
+		this.addPluginInternal((AbstractPlugin)arg0);
+		
+	}
+
+	@Override
+	public void removePlugin(IPlugin arg0) {
+		// TODO Auto-generated method stub
 		
 	}
 

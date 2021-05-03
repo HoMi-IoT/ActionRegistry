@@ -46,6 +46,12 @@ public class DummyPlugin extends AbstractPlugin{
 	private byte[] read(Object ...args) {
 		return new byte[] {0x01};
 	}
+
+	@Override
+	public void teardown() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 
 

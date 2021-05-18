@@ -7,20 +7,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.homi.plugin.ARspec.ARSpec;
+import org.homi.plugin.ARspec.*;
 
 
 
 @PluginID(id = "ActionRegistry")
 public class ActionRegistry extends AbstractPlugin implements IPluginRegistryListener{
-	private Map<AbstractPlugin, List<Class<? extends ISpecification>>> abstractPluginToSpecMappings = new HashMap<>();
-	private Map<String, List<Class<? extends ISpecification>>> pluginIdToSpecMappings = new HashMap<>();
+	static Map<AbstractPlugin, List<Class<? extends ISpecification>>> abstractPluginToSpecMappings = new HashMap<>();
+	static Map<String, List<Class<? extends ISpecification>>> pluginIdToSpecMappings = new HashMap<>();
 	
 		
 		
 	private PluginParser pluginParser = new PluginParser();
 	@Override
 	public void setup() {	
+		
 		CommanderBuilder<ARSpec> cb = new CommanderBuilder<>(ARSpec.class) ;
 		
 		this.addCommander(ARSpec.class, cb.onCommandEquals(ARSpec.CALL, this::call).build());
@@ -53,7 +54,7 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 		
 	}
 
-	public <T extends Enum<?> & ISpecification> Object sendCommandToPlugin(AbstractPlugin plugin, String specID, String command, Object... args) {
+	public static <T extends Enum<?> & ISpecification> Object sendCommandToPlugin(AbstractPlugin plugin, String specID, String command, Object... args) {
 
 		List<Class<? extends ISpecification>> specs = abstractPluginToSpecMappings.get(plugin);
 		Class<? extends ISpecification> spec = getSpecByName(specs, specID);
@@ -73,7 +74,7 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 		
 	}
 	
-	public <T extends Enum<?> & ISpecification> T getCommandByName(String cmd, List<? extends ISpecification> cmds){
+	public static <T extends Enum<?> & ISpecification> T getCommandByName(String cmd, List<? extends ISpecification> cmds){
 		for (ISpecification c : cmds) {
 			if(cmd.equals(c.name())) {
 				return (T)c;
@@ -82,7 +83,7 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 		return null;
 	}
 	
-	public Class<? extends ISpecification> getSpecByName(List<Class<? extends ISpecification>> spec, String specID){
+	public static Class<? extends ISpecification> getSpecByName(List<Class<? extends ISpecification>> spec, String specID){
 		for(Class<? extends ISpecification> s : spec) {
 			if(s.getAnnotationsByType(SpecificationID.class)[0].id().equals(specID)) {
 				return s;
@@ -91,7 +92,7 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 		return null;
 	}
 
-	public AbstractPlugin findPluginForSpec(String specID) {
+	public static AbstractPlugin findPluginForSpec(String specID) {
 		
 		for(Map.Entry<AbstractPlugin, List<Class<? extends ISpecification>>> entry : abstractPluginToSpecMappings.entrySet()) {
 			List<Class<? extends ISpecification>> specs = entry.getValue();

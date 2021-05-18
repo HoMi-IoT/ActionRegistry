@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.homi.plugin.BLEspec.BLESpec;
 import org.homi.plugin.api.*;
 import org.homi.plugin.specification.ISpecification;
 import org.homi.plugin.specification.SpecificationID;

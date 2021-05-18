@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.homi.plugin.ARspec.ARSpec;
-import org.homi.plugin.BLEspec.BLESpec;
+
 
 
 @PluginID(id = "ActionRegistry")
@@ -22,16 +22,27 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 	@Override
 	public void setup() {	
 		CommanderBuilder<ARSpec> cb = new CommanderBuilder<>(ARSpec.class) ;
-		cb.onCommandEquals(ARSpec.CALL, this::call).build();
+		
+		this.addCommander(ARSpec.class, cb.onCommandEquals(ARSpec.CALL, this::call).build());
 		
 		this.getPluginProvider().addPluginRegistryListener(this);
 	}
 	
 	public Object call(Object... objects) {
 		AbstractPlugin p = findPluginForSpec((String)objects[0]);
-		if(p != null) {
-			return sendCommandToPlugin(p, (String)objects[0], (String)objects[1], objects[2]);
+		System.out.println("Requested spec is: " + (String)objects[0]);
+		System.out.println("Current specs are: ");
+		for(Map.Entry<AbstractPlugin, List<Class<? extends ISpecification>>> entry : abstractPluginToSpecMappings.entrySet()) {
+			List<Class<? extends ISpecification>> specs = entry.getValue();
+			for(Class<? extends ISpecification> spec : specs) {
+				System.out.println(spec.getAnnotation(SpecificationID.class).id());
+			}
 		}
+		if(p != null) {
+			System.out.println("Making call to plugin");
+			return sendCommandToPlugin(p, (String)objects[0], (String)objects[1], (Object[])objects[2]);
+		}
+		System.out.println("No plugin for spec was found");
 		return null;
 	}
 
@@ -43,10 +54,19 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 	}
 
 	public <T extends Enum<?> & ISpecification> Object sendCommandToPlugin(AbstractPlugin plugin, String specID, String command, Object... args) {
-		
+
 		List<Class<? extends ISpecification>> specs = abstractPluginToSpecMappings.get(plugin);
 		Class<? extends ISpecification> spec = getSpecByName(specs, specID);
 		T cmd = getCommandByName(command, List.of(spec.getEnumConstants()));
+		
+		
+		
+		/*
+		 * for(Object arg : args) {
+		 * 
+		 * }
+		 */
+		
 		Commander<?> c = plugin.getCommander(spec);
 		return c.execute(cmd, args);
 		
@@ -95,6 +115,7 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 
 	@Override
 	public void addPlugin(IPlugin arg0) {
+		
 		this.addPluginInternal((AbstractPlugin)arg0);
 		
 	}

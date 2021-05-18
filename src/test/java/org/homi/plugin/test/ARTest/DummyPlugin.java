@@ -1,6 +1,6 @@
 package org.homi.plugin.test.ARTest;
 
-import org.homi.plugin.BLEspec.BLESpec;
+
 import org.homi.plugin.api.AbstractPlugin;
 import org.homi.plugin.api.Commander;
 import org.homi.plugin.api.CommanderBuilder;

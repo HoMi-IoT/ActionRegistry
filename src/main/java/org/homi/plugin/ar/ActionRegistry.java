@@ -1,10 +1,18 @@
 package org.homi.plugin.ar;
-import org.homi.plugin.api.*;
+import org.homi.plugin.api.Commander;
+import org.homi.plugin.api.CommanderBuilder;
+import org.homi.plugin.api.IPlugin;
+import org.homi.plugin.api.IPluginRegistryListener;
+import org.homi.plugin.api.PluginID;
+import org.homi.plugin.api.basicplugin.AbstractBasicPlugin;
+import org.homi.plugin.api.basicplugin.IBasicPlugin;
+import org.homi.plugin.api.exceptions.PluginException;
 import org.homi.plugin.specification.ISpecification;
-import org.homi.plugin.specification.ParameterType;
 import org.homi.plugin.specification.SpecificationID;
+import org.homi.plugin.specification.TypeDef;
+import org.homi.plugin.specification.exceptions.ArgumentLengthException;
+import org.homi.plugin.specification.exceptions.InvalidArgumentException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,39 +23,39 @@ import org.homi.plugin.ARspec.*;
 
 
 @PluginID(id = "ActionRegistry")
-public class ActionRegistry extends AbstractPlugin implements IPluginRegistryListener{
-	static Map<AbstractPlugin, List<Class<? extends ISpecification>>> abstractPluginToSpecMappings = new HashMap<>();
+public class ActionRegistry extends AbstractBasicPlugin implements IPluginRegistryListener{
+	static Map<IBasicPlugin, List<Class<? extends ISpecification>>> abstractPluginToSpecMappings = new HashMap<>();
 	static Map<String, List<Class<? extends ISpecification>>> pluginIdToSpecMappings = new HashMap<>();
 	
 		
 		
 	private PluginParser pluginParser = new PluginParser();
-	private IActionBuilder specBuilder;
+	//private IActionBuilder specBuilder;
 	@Override
 	public void setup() {	
-		specBuilder = new SpecActionBuilder();
+		//specBuilder = new SpecActionBuilder();
 		
 		CommanderBuilder<ARSpec> cb = new CommanderBuilder<>(ARSpec.class) ;
 		
 		this.addCommander(ARSpec.class, cb.onCommandEquals(ARSpec.CALL, args -> {
-			try {
-				return call(args);
-			} catch (TypeMismatchException | ClassCastException | IllegalArgumentException | ClassNotFoundException
-					| IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
+				try {
+					return call(args);
+				} catch (InvalidArgumentException | ArgumentLengthException | PluginException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			return args;
 		}).build());
 		
 		this.getPluginProvider().addPluginRegistryListener(this);
 	}
 	
-	public Object call(Object... objects) throws TypeMismatchException, ClassCastException, IllegalArgumentException, ClassNotFoundException, IOException {
-		AbstractPlugin p = findPluginForSpec((String)objects[0]);
+	public Object call(Object... objects) throws InvalidArgumentException, ArgumentLengthException, PluginException {
+		IBasicPlugin p = findPluginForSpec((String)objects[0]);
 		System.out.println("Requested spec is: " + (String)objects[0]);
 		System.out.println("Current specs are: ");
-		for(Map.Entry<AbstractPlugin, List<Class<? extends ISpecification>>> entry : abstractPluginToSpecMappings.entrySet()) {
+		for(Map.Entry<IBasicPlugin, List<Class<? extends ISpecification>>> entry : abstractPluginToSpecMappings.entrySet()) {
 			List<Class<? extends ISpecification>> specs = entry.getValue();
 			for(Class<? extends ISpecification> spec : specs) {
 				System.out.println(spec.getAnnotation(SpecificationID.class).id());
@@ -71,19 +79,11 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 	 * }
 	 */
 
-	public static <T extends Enum<?> & ISpecification> Object sendCommandToPlugin(AbstractPlugin plugin, String specID, String command, Object... args) throws TypeMismatchException, ClassCastException, IllegalArgumentException, ClassNotFoundException, IOException {
+	public static <T extends Enum<?> & ISpecification> Object sendCommandToPlugin(IBasicPlugin plugin, String specID, String command, Object... args) throws PluginException, InvalidArgumentException, ArgumentLengthException {
 
 		List<Class<? extends ISpecification>> specs = abstractPluginToSpecMappings.get(plugin);
 		Class<? extends ISpecification> spec = getSpecByName(specs, specID);
 		T cmd = getCommandByName(command, List.of(spec.getEnumConstants()));
-		
-		
-		
-		/*
-		 * for(Object arg : args) {
-		 * 
-		 * }
-		 */
 		
 		Commander<?> c = plugin.getCommander(spec);
 		return c.execute(cmd, args);
@@ -109,9 +109,9 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 		return null;
 	}
 
-	public static AbstractPlugin findPluginForSpec(String specID) {
+	public static IBasicPlugin findPluginForSpec(String specID) {
 		
-		for(Map.Entry<AbstractPlugin, List<Class<? extends ISpecification>>> entry : abstractPluginToSpecMappings.entrySet()) {
+		for(Map.Entry<IBasicPlugin, List<Class<? extends ISpecification>>> entry : abstractPluginToSpecMappings.entrySet()) {
 			List<Class<? extends ISpecification>> specs = entry.getValue();
 			for(Class<? extends ISpecification> spec : specs) {
 				if(spec.getAnnotation(SpecificationID.class).id().equals(specID)) {
@@ -133,24 +133,27 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 
 	@Override
 	public void addPlugin(IPlugin arg0) {
-		
-		AbstractPlugin plugin = (AbstractPlugin)arg0;
+		IBasicPlugin plugin = (IBasicPlugin)arg0;
 		String pluginID = plugin.getClass().getAnnotation(PluginID.class).id();
-		List<Class<? extends ISpecification>> specs = plugin.getSpecifications();
-		for(Class<? extends ISpecification> s : specs) {
-			String specID = s.getAnnotation(SpecificationID.class).id();
-			for(ISpecification a : s.getEnumConstants()) {
-				String cmdName = a.name();
-				ParameterType<?>[] pTypes = a.getParameterTypes();
-				List<ActionParameter<?>> ap = new ArrayList<ActionParameter<?>>();
-				for(ParameterType<?> p : pTypes) {
-					ap.add(new ActionParameter<>(p.getTypeClass()));
+		List<Class<? extends ISpecification>> specs;
+		try {
+			specs = plugin.getSpecifications();
+			for(Class<? extends ISpecification> s : specs) {
+				String specID = s.getAnnotation(SpecificationID.class).id();
+				for(ISpecification a : s.getEnumConstants()) {
+					String cmdName = a.name();
+					TypeDef<?>[] pTypes = a.getParameterTypes();
+					List<ActionParameter<?>> ap = new ArrayList<ActionParameter<?>>();
+					for(TypeDef<?> p : pTypes) {
+						ap.add(new ActionParameter<>(p.getTypeClass()));
+					}
+					SpecAction sa = new SpecAction(specID, cmdName);
 				}
-				SpecAction sa = new SpecAction(specID, cmdName, );
 			}
-		}
-		
-		
+		} catch (PluginException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 
 	@Override

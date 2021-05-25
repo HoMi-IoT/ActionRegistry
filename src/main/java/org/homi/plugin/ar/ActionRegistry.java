@@ -1,8 +1,11 @@
 package org.homi.plugin.ar;
 import org.homi.plugin.api.*;
 import org.homi.plugin.specification.ISpecification;
+import org.homi.plugin.specification.ParameterType;
 import org.homi.plugin.specification.SpecificationID;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,17 +22,28 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 		
 		
 	private PluginParser pluginParser = new PluginParser();
+	private IActionBuilder specBuilder;
 	@Override
 	public void setup() {	
+		specBuilder = new SpecActionBuilder();
 		
 		CommanderBuilder<ARSpec> cb = new CommanderBuilder<>(ARSpec.class) ;
 		
-		this.addCommander(ARSpec.class, cb.onCommandEquals(ARSpec.CALL, this::call).build());
+		this.addCommander(ARSpec.class, cb.onCommandEquals(ARSpec.CALL, args -> {
+			try {
+				return call(args);
+			} catch (TypeMismatchException | ClassCastException | IllegalArgumentException | ClassNotFoundException
+					| IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return args;
+		}).build());
 		
 		this.getPluginProvider().addPluginRegistryListener(this);
 	}
 	
-	public Object call(Object... objects) {
+	public Object call(Object... objects) throws TypeMismatchException, ClassCastException, IllegalArgumentException, ClassNotFoundException, IOException {
 		AbstractPlugin p = findPluginForSpec((String)objects[0]);
 		System.out.println("Requested spec is: " + (String)objects[0]);
 		System.out.println("Current specs are: ");
@@ -47,14 +61,17 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 		return null;
 	}
 
-	public void addPluginInternal(AbstractPlugin plugin) {
-		
-		abstractPluginToSpecMappings.put(plugin, plugin.getSpecifications());
-		pluginIdToSpecMappings.put(plugin.getClass().getAnnotation(PluginID.class).id(), plugin.getSpecifications());
-		
-	}
+	/*
+	 * public void addPluginInternal(AbstractPlugin plugin) {
+	 * 
+	 * abstractPluginToSpecMappings.put(plugin, plugin.getSpecifications());
+	 * pluginIdToSpecMappings.put(plugin.getClass().getAnnotation(PluginID.class).id
+	 * (), plugin.getSpecifications());
+	 * 
+	 * }
+	 */
 
-	public static <T extends Enum<?> & ISpecification> Object sendCommandToPlugin(AbstractPlugin plugin, String specID, String command, Object... args) {
+	public static <T extends Enum<?> & ISpecification> Object sendCommandToPlugin(AbstractPlugin plugin, String specID, String command, Object... args) throws TypeMismatchException, ClassCastException, IllegalArgumentException, ClassNotFoundException, IOException {
 
 		List<Class<? extends ISpecification>> specs = abstractPluginToSpecMappings.get(plugin);
 		Class<? extends ISpecification> spec = getSpecByName(specs, specID);
@@ -117,7 +134,22 @@ public class ActionRegistry extends AbstractPlugin implements IPluginRegistryLis
 	@Override
 	public void addPlugin(IPlugin arg0) {
 		
-		this.addPluginInternal((AbstractPlugin)arg0);
+		AbstractPlugin plugin = (AbstractPlugin)arg0;
+		String pluginID = plugin.getClass().getAnnotation(PluginID.class).id();
+		List<Class<? extends ISpecification>> specs = plugin.getSpecifications();
+		for(Class<? extends ISpecification> s : specs) {
+			String specID = s.getAnnotation(SpecificationID.class).id();
+			for(ISpecification a : s.getEnumConstants()) {
+				String cmdName = a.name();
+				ParameterType<?>[] pTypes = a.getParameterTypes();
+				List<ActionParameter<?>> ap = new ArrayList<ActionParameter<?>>();
+				for(ParameterType<?> p : pTypes) {
+					ap.add(new ActionParameter<>(p.getTypeClass()));
+				}
+				SpecAction sa = new SpecAction(specID, cmdName, );
+			}
+		}
+		
 		
 	}
 

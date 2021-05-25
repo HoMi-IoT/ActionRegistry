@@ -1,21 +1,29 @@
 package org.homi.plugin.ar;
 
+import org.homi.plugin.ARspec.CustomAction;
 import org.homi.plugin.ARspec.IAction;
+import org.homi.plugin.ARspec.IActionVisitor;
+import org.homi.plugin.ARspec.ScriptAction;
+import org.homi.plugin.ARspec.SpecAction;
 
-public abstract class ActionConsumer {
-	private ActionConsumer next;
-	public abstract Object doAction(IAction a);
-	public void setNext(ActionConsumer ac) {
-		if(this.next == null) {
-			this.next = ac;
-			return;
-		}
-		else {
-			this.next.setNext(ac);
-		}
+public class ActionConsumer implements IActionVisitor{
+
+	@Override
+	public void visit(SpecAction sa) {
+		
+		
+	}
+
+	@Override
+	public void visit(CustomAction ca) {
+		
+		
+	}
+
+	@Override
+	public void visit(ScriptAction sa) {
+		
+		
 	}
 	
-	public ActionConsumer getNext() {
-		return this.next;
-	}
 }

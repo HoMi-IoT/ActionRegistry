@@ -15,36 +15,48 @@ import org.homi.plugin.specification.SpecificationID;
 import org.homi.plugin.specification.TypeDef;
 import org.homi.plugins.ar.specification.actions.arguments.VariableArgument;
 import org.homi.plugins.ar.specification.actions.plugin.SpecificationActionDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PluginRegistryListener implements IPluginRegistryListener {
-
+	
+	private Logger logger = LoggerFactory.getLogger(PluginRegistryListener.class);
+	
 	@Override
 	public void addPlugin(IPlugin addedPlugin) {
-		String pluginID = addedPlugin.id();
-		List<Class<? extends ISpecification>> specs;
+		addPluginInternal(addedPlugin);
+	}
+	
+	private  <T extends Enum<T> & ISpecification> void addPluginInternal(IPlugin addedPlugin) {
+		List<Class<T>> specs;
+		logger.trace("plugin {} Added", addedPlugin.id());
 		try {
 			specs = ((IBasicPlugin) addedPlugin).getSpecifications();
-			for(Class<? extends ISpecification> s : specs) {
-				buildSpecificationActions(pluginID, s);
+			for(Class<T> s : specs) {
+				buildSpecificationActions(addedPlugin, s);
 			}
 		} catch (PluginException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void buildSpecificationActions(String pluginID, Class<? extends ISpecification> s) {
-		String specificationID = s.getAnnotation(SpecificationID.class).id();
-		for(ISpecification a : s.getEnumConstants()) {
-			buildAction(pluginID, specificationID, a);
+	private <T extends Enum<T> & ISpecification> void buildSpecificationActions(IPlugin plugin, Class<T> s) {
+		logger.trace("plugin has {} commands in specification {}", s.getEnumConstants().length, s.getAnnotation(SpecificationID.class).id());
+		for(T a : s.getEnumConstants()) {
+			logger.trace("building command {}", a.name());
+			buildAction(plugin, a);
 		}
 	}
 
-	private void buildAction(String pluginID, String specificationID, ISpecification a) {
+	private <T extends Enum<T> & ISpecification> void buildAction(IPlugin plugin, T a) {
+
 		String cmdName = a.name();
 		List<TypeDef<?>> parameterTypes = a.getParameterTypes();
+
 		List<VariableArgument<?>> ap = new ArrayList<VariableArgument<?>>();
 		BuildVariableArguments(parameterTypes, ap);
-		SpecificationActionDefinition sad = new SpecificationActionDefinition(specificationID, cmdName);
+		SpecificationActionDefinition sad = new SpecificationActionDefinition(plugin, a);
+		logger.trace("built plugin {}, command {}", plugin.id(), cmdName);
 		sad.accept(ActionRegistry.adv);
 	}
 

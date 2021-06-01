@@ -1,10 +1,8 @@
 package org.homi.plugin.test.ARTest;
 
-import org.homi.plugin.ARspec.ARSpec;
-import org.homi.plugin.api.Commander;
+import org.homi.plugin.api.commander.Commander;
 import org.homi.plugin.ar.ActionRegistry;
-import org.homi.plugin.ar.PluginParser;
-
+import org.homi.plugins.ar.specification.ARSpec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,34 +29,14 @@ class ActionRegistryTest {
 		ar.setup();
 		Commander<ARSpec> c = ar.getCommander(ARSpec.class);
 	}
-	
-	@Test
-	void pluginParserGetsSpecs() {
-		PluginParser pp = new PluginParser();
-		DummyPlugin d = new DummyPlugin();
-		d.setup();
-		pp.getSpecs(d);
-	}
-	
-	@Test
-	void pluginParserGetsCommandsFromSpec() {
-		PluginParser pp = new PluginParser();
-		
-		
-		
-		
-		//List<String> bleCommands = pp.getCommands(BLESpec.class);
-		//assertEquals(bleCommands.get(0), "CONNECT");
-		
-		
-	}
+
 	
 	@Test
 	void actionRegistryGetsNotifiedOfNewPlugin(){
 		ActionRegistry ar = new ActionRegistry();
 		ar.setup();
 		DummyPlugin d = new DummyPlugin();
-		ar.addPlugin(d);
+//		ar.addPlugin(d);
 		
 	}
 	
@@ -68,7 +46,7 @@ class ActionRegistryTest {
 		ar.setup();
 		DummyPlugin d = new DummyPlugin();
 		d.setup();
-		ar.addPlugin(d);
+//		ar.addPlugin(d);
 		//Assertions.assertTrue((boolean)ar.sendCommandToPlugin(d, "BLESpec", "CONNECT", "arg"));
 	}
 	
@@ -78,7 +56,7 @@ class ActionRegistryTest {
 		ar.setup();
 		DummyPlugin d = new DummyPlugin();
 		d.setup();
-		ar.addPlugin(d);
+//		ar.addPlugin(d);
 		//AbstractPlugin p = ar.findPluginForSpec("BLESpec");
 		//Assertions.assertTrue(p.getClass().getAnnotation(PluginID.class).id().equals("DummyPlugin"));
 		

@@ -1,10 +1,10 @@
 package org.homi.plugin.test.ARTest;
 
 
-import org.homi.plugin.api.Commander;
-import org.homi.plugin.api.CommanderBuilder;
 import org.homi.plugin.api.PluginID;
 import org.homi.plugin.api.basicplugin.AbstractBasicPlugin;
+import org.homi.plugin.api.commander.Commander;
+import org.homi.plugin.api.commander.CommanderBuilder;
 
 @PluginID(id = "DummyPlugin")
 public class DummyPlugin extends AbstractBasicPlugin{

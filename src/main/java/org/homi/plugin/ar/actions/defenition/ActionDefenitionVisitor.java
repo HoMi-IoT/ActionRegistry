@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.homi.plugin.api.basicplugin.IBasicPlugin;
+import org.homi.plugin.api.commander.Commander;
 import org.homi.plugin.api.exceptions.PluginException;
 import org.homi.plugin.ar.ActionRegistry;
 import org.homi.plugin.ar.actions.SpecificationAction;
@@ -28,7 +29,7 @@ public class ActionDefenitionVisitor implements IActionDefenitionVisitor {
 		try {
 			var commander = ((IBasicPlugin)sad.getPlugin()).getCommander((Class<? extends ISpecification>) sad.getCommand().getClass());
 			logger.trace("made parameters for action {}",  sad.getCommand());
-			SpecificationAction<?> specificationAction = new SpecificationAction(sad.getCommand().getClass(), parameters, commander, sad.getCommand());
+			SpecificationAction<?> specificationAction = buildSpecificationAction(sad, parameters, commander);
 
 			logger.trace("Specification action built");
 			ActionRegistry.actions.add(specificationAction);
@@ -36,6 +37,10 @@ public class ActionDefenitionVisitor implements IActionDefenitionVisitor {
 			e.printStackTrace();
 		}
 		
+	}
+
+	private <T extends Enum<T> & ISpecification> SpecificationAction<T> buildSpecificationAction(SpecificationActionDefinition<T> sad, List<String> parameters,	Commander<T> commander) {
+		return new SpecificationAction(sad.getCommand().getClass(), parameters, commander, sad.getCommand(), sad.getPlugin());
 	}
 
 	@Override

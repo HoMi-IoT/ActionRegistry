@@ -3,5 +3,6 @@
 /home/nicolas/git/ActionRegistry/src/main/java/org/homi/plugin/ar/ActionRegistry.java
 /home/nicolas/git/ActionRegistry/src/main/java/org/homi/plugin/ar/actions/AbstractAction.java
 /home/nicolas/git/ActionRegistry/src/main/java/module-info.java
+/home/nicolas/git/ActionRegistry/src/main/java/org/homi/plugin/ar/actions/ScriptAction.java
 /home/nicolas/git/ActionRegistry/src/main/java/org/homi/plugin/ar/PluginRegistryListener.java
 /home/nicolas/git/ActionRegistry/src/main/java/org/homi/plugin/ar/actions/defenition/ActionDefenitionVisitor.java

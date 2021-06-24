@@ -7,6 +7,7 @@ import org.homi.plugin.api.basicplugin.IBasicPlugin;
 import org.homi.plugin.api.commander.Commander;
 import org.homi.plugin.api.exceptions.PluginException;
 import org.homi.plugin.ar.ActionRegistry;
+import org.homi.plugin.ar.actions.ScriptAction;
 import org.homi.plugin.ar.actions.SpecificationAction;
 import org.homi.plugin.specification.ISpecification;
 import org.homi.plugins.ar.specification.actions.CustomActionDefenition;
@@ -50,7 +51,8 @@ public class ActionDefenitionVisitor implements IActionDefenitionVisitor {
 
 	@Override
 	public void visit(ScriptActionDefinition sa) {
-		// TODO Auto-generated method stub
+		logger.trace("Script action built: " + sa.getCommand());
+		ActionRegistry.actions.add(new ScriptAction(sa.getCommand(), sa.getTags(), sa.getActionQuery()));
 	}
 
 }

@@ -53,8 +53,6 @@ public abstract class AbstractAction implements IAction {
 
 	@Override
 	public final <R> R run() {
-//		System.out.println("running");
-//		return (R) this.invocationUnit.apply(arguments);
 		throw new UnsupportedOperationException();
 	};
 

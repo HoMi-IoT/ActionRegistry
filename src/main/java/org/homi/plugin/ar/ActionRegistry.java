@@ -53,7 +53,7 @@ public class ActionRegistry extends AbstractBasicPlugin{
 	public static BiFunction<Map<String, Serializable>, ClassLoader, Object> getAction(Object...args){
 		ActionQuery aq = (ActionQuery) args[0];
 
-		logger.trace("got query " + aq.getPluginID() + " "+aq.getSpecificationID() + " "+aq.getCommand() );
+		logger.trace("got query " + aq.getPluginID() + " " + aq.getSpecificationID() + " " + aq.getCommand() );
 		for(var action: ActionRegistry.actions) {
 //			logger.trace("matching " + action );
 			if(action.match(aq)) {

@@ -23,7 +23,7 @@ public class SpecificationAction<T extends Enum<T> & ISpecification> extends Abs
 	private String command;
 	
 	public SpecificationAction(Class<T> specification, List<String> parameters, Commander<T> commander, T command, IPlugin plugin) {
-		super(parameters);
+//		super(parameters);
 		
 		this.pluginID = plugin.id();
 		this.specificationID = command.id();

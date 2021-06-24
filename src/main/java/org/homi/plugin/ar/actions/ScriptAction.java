@@ -14,7 +14,7 @@ public class ScriptAction extends AbstractAction {
 	private List<String> tags;
 	
 	public ScriptAction(String command, List<String> tags, ActionQuery actionQuery) {
-		super(List.of());
+//		super(List.of());
 		this.tags = tags;
 		this.command = command;
 		var action = ActionRegistry.getAction(actionQuery);
@@ -22,10 +22,10 @@ public class ScriptAction extends AbstractAction {
 				(arguments, classLoader)->{
 					System.out.println("calling script action: " + command);
 					try {
-						Map<String,Serializable> args = new HashMap<String,Serializable>();
-						args.put("0", command);
-						args.put("1", (Serializable) arguments);
-						return action.apply(args, classLoader);
+//						Map<String,Serializable> args = new HashMap<String,Serializable>();
+//						args.put("0", command);
+//						args.put("1", (Serializable) arguments);
+						return action.apply(Map.of("0", command, "1", (Serializable)arguments), classLoader);
 //						return command.getReturnType().process(ret, classLoader);
 					} catch (Exception e) {
 						throw new RuntimeException(e);
